@@ -44,7 +44,8 @@ async def home():
           <p>
             This API is powered by a fine-tuned <strong>Vision Transformer</strong> model based on 
             <code>google/vit-base-patch16-224-in21k</code>. It has been adapted for medical image classification using the CheXpert dataset.
-            The model distinguishes among five classes: <em>Cardiomegaly, Edema, Consolidation, Pneumonia,</em> and <em>No Finding</em>.
+            The model distinguishes among five classes: <em>Cardiomegaly, Edema, Consolidation, Pneumonia,</em> and <em>No Finding</em>. 
+            The model weights can be downloaded from <a href="https://huggingface.co/codewithdark/vit-chest-xray" target="_blank"> HuggingFace</a>.
           </p>
           <p>
             <strong>Performance:</strong><br>
@@ -73,20 +74,6 @@ async def home():
           <pre>
 curl -X POST "http://localhost:8000/predict" -F "image_file=@your_image.jpg"
           </pre>
-        </section>
-        
-        <section>
-          <h2>Additional Resources & Related Work</h2>
-          <p>
-            <strong>CheXpert Dataset:</strong> The model utilizes images from the CheXpert dataset, an industry standard for chest X-ray analysis. For more details, visit the 
-            <a href="https://stanfordmlgroup.github.io/competitions/chexpert/" target="_blank">CheXpert official website</a>.
-          </p>
-          <p>
-            <strong>Related Projects:</strong> Other projects in this domain include works such as 
-            <a href="https://huggingface.co/codewithdark/vit-chest-xray" target="_blank">codewithdark/vit-chest-xray</a>, 
-            <a href="https://arxiv.org/abs/2311.07263" target="_blank">LT-ViT: A Vision Transformer for Multi-Label Chest X-ray Classification</a>,
-            and various studies that demonstrate the advantages of Vision Transformers over CNNs in medical imaging.
-          </p>
         </section>
       </body>
     </html>
