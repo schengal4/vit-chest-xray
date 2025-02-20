@@ -1,124 +1,114 @@
----
-license: mit
-language:
-- en
-metrics:
-- accuracy
-base_model:
-- google/vit-base-patch16-224-in21k
-pipeline_tag: image-classification
-library_name: transformers
-tags:
-- medical
-- biology
----
+# Chest X-ray Image Classifier API
 
-
-# Chest X-ray Image Classifier
-
-This repository contains a fine-tuned **Vision Transformer (ViT)** model for classifying chest X-ray images, utilizing the **CheXpert** dataset. The model is fine-tuned on the task of classifying various lung diseases from chest radiographs, achieving impressive accuracy in distinguishing between different conditions.
+This repository provides a REST API built with FastAPI that leverages a fine-tuned Vision Transformer (ViT) model for classifying chest X-ray images. The model is adapted from the [codewithdark/vit-chest-xray](https://huggingface.co/codewithdark/vit-chest-xray) repository and has been refined on the CheXpert dataset to identify multiple lung conditions.
 
 ## Model Overview
 
-The fine-tuned model is based on the **Vision Transformer (ViT)** architecture, which excels in handling image-based tasks by leveraging attention mechanisms for efficient feature extraction. The model was trained on the **CheXpert dataset**, which consists of labeled chest X-ray images for detecting diseases such as pneumonia, cardiomegaly, and others.
+The model is based on the [google/vit-base-patch16-224-in21k](https://huggingface.co/google/vit-base-patch16-224-in21k) architecture and is fine-tuned to distinguish among five classes:
+- **Cardiomegaly**
+- **Edema**
+- **Consolidation**
+- **Pneumonia**
+- **No Finding**
 
-## Performance
+Key performance highlights include:
+- **Final Validation Accuracy:** 98.46%
+- **Final Training Loss:** 0.1069
+- **Final Validation Loss:** 0.0980
 
-- **Final Validation Accuracy**: 98.46%
-- **Final Training Loss**: 0.1069
-- **Final Validation Loss**: 0.0980
-
-The model achieved a significant accuracy improvement during training, demonstrating its ability to generalize well to unseen chest X-ray images.
+By utilizing the attention mechanism inherent to Vision Transformers, the model effectively extracts and analyzes features from chest radiographs.
 
 ## Dataset
 
-The dataset used for fine-tuning the model is the **CheXpert** dataset, which includes chest X-ray images from various patients with multi-label annotations. The data includes frontal and lateral views of the chest for each patient, annotated with labels for various lung diseases.
-
-For more details on the dataset, visit the [CheXpert official website](https://stanfordmlgroup.github.io/chexpert/).
+The model is fine-tuned on the [CheXpert dataset](https://stanfordmlgroup.github.io/chexpert/), a large-scale collection of chest X-ray images with multi-label annotations. This dataset includes both frontal and lateral views, providing comprehensive data for detecting various lung abnormalities.
 
 ## Training Details
 
-The model was fine-tuned using the following settings:
+The fine-tuning process involved:
+- **Optimizer:** AdamW
+- **Learning Rate:** 3e-5
+- **Batch Size:** 32
+- **Epochs:** 10
+- **Loss Function:** Binary Cross-Entropy with Logits
+- **Precision:** Mixed precision training using `torch.amp`
 
-- **Optimizer**: AdamW
-- **Learning Rate**: 3e-5
-- **Batch Size**: 32
-- **Epochs**: 10
-- **Loss Function**: Binary Cross-Entropy with Logits
-- **Precision**: Mixed precision (via `torch.amp`)
+These parameters were optimized to ensure robust performance and generalization to unseen data.
 
-## Usage
+## API Usage
 
-### Inference
+The API is built with FastAPI and exposes the following endpoints:
 
-To use the fine-tuned model for inference, simply load the model from Hugging Face's Model Hub and input a chest X-ray image:
+### Endpoints
 
-```python
-from PIL import Image
-import torch
-from transformers import AutoImageProcessor, AutoModelForImageClassification
+- **GET /**: Returns an HTML homepage with model details and usage instructions.
+- **POST /predict**: Accepts an image file and returns the predicted class index, label, and corresponding probabilities.
 
-# Load model and processor
-processor = AutoImageProcessor.from_pretrained("codewithdark/vit-chest-xray")
-model = AutoModelForImageClassification.from_pretrained("codewithdark/vit-chest-xray")
+### Example with cURL
 
-# Define label columns (class names)
-label_columns = ['Cardiomegaly', 'Edema', 'Consolidation', 'Pneumonia', 'No Finding']
-
-# Step 1: Load and preprocess the image
-image_path = "/content/images.jpeg"  # Replace with your image path
-
-# Open the image
-image = Image.open(image_path)
-
-# Ensure the image is in RGB mode (required by most image classification models)
-if image.mode != 'RGB':
-    image = image.convert('RGB')
-    print("Image converted to RGB.")
-
-# Step 2: Preprocess the image using the processor
-inputs = processor(images=image, return_tensors="pt")
-
-# Step 3: Make a prediction (using the model)
-with torch.no_grad():  # Disable gradient computation during inference
-    outputs = model(**inputs)
-
-# Step 4: Extract logits and get the predicted class index
-logits = outputs.logits  # Raw logits from the model
-predicted_class_idx = torch.argmax(logits, dim=-1).item()  # Get the class index
-
-# Step 5: Map the predicted index to a class label
-# You can also use `model.config.id2label`, but we'll use `label_columns` for this task
-predicted_class_label = label_columns[predicted_class_idx]
-
-# Output the results
-print(f"Predicted Class Index: {predicted_class_idx}")
-print(f"Predicted Class Label: {predicted_class_label}")
-
-'''
-Output :
-Predicted Class Index: 4
-Predicted Class Label: No Finding
-'''
+```bash
+curl -X POST "http://localhost:8000/predict" -F "image_file=@your_image.jpg"
 ```
 
-### Fine-Tuning
+This command sends an image to the `/predict` endpoint and returns a JSON response similar to:
 
-To fine-tune the model on your own dataset, you can follow the instructions in this repo to adapt the code to your dataset and training configuration.
+```json
+{
+  "predicted_class_idx": 4,
+  "predicted_class_label": "No Finding",
+  "probabilities": {
+    "Cardiomegaly": 0.01,
+    "Edema": 0.02,
+    "Consolidation": 0.03,
+    "Pneumonia": 0.05,
+    "No Finding": 0.89
+  }
+}
+```
+
+## Installation & Setup
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/chest-xray-classifier.git
+   cd chest-xray-classifier
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the FastAPI server:**
+
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+4. **Access the homepage:**  
+   Open your browser and navigate to `http://localhost:8000/` to view API details and usage instructions.
+
+## Fine-Tuning the Model
+
+To fine-tune the model on your own dataset:
+1. Adapt the image preprocessing steps (ensuring images are in RGB format).
+2. Use the `AutoImageProcessor` and `AutoModelForImageClassification` from the `transformers` library to load the model.
+3. Modify hyperparameters (learning rate, batch size, epochs, etc.) as needed.
+
+Refer to the source code in this repository for detailed instructions on adjusting the training pipeline.
 
 ## Contributing
 
-We welcome contributions! If you have suggestions, improvements, or bug fixes, feel free to fork the repository and open a pull request.
+Contributions are welcome! If you have suggestions, improvements, or bug fixes, please fork the repository and submit a pull request. Follow standard coding and testing practices.
+
+## Credit & Acknowledgements
+
+- **Initial Model Source:** This project builds upon the work available in [codewithdark/vit-chest-xray](https://huggingface.co/codewithdark/vit-chest-xray). All credit for the original model and its fine-tuning methodology goes to codewithdark.
+- **CheXpert Dataset:** Thanks to the Stanford ML Group for providing the CheXpert dataset.
+- **Hugging Face:** For the `transformers` library and the model hub which greatly simplify model sharing and fine-tuning.
+- **Community Contributions:** Special thanks to everyone who has contributed ideas and improvements.
 
 ## License
 
-This model is available under the MIT License. See [LICENSE](LICENSE) for more details.
-
-## Acknowledgements
-
-- [CheXpert Dataset](https://stanfordmlgroup.github.io/chexpert/)
-- Hugging Face for providing the `transformers` library and Model Hub.
-
----
-Happy coding! 🚀
-
+This project is available under the [MIT License](LICENSE).
