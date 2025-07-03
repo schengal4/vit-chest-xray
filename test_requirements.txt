@@ -1,0 +1,41 @@
+# Testing requirements for Health Universe FastAPI application
+# Install with: pip install -r test-requirements.txt
+
+# Core testing framework
+pytest>=7.0.0
+pytest-asyncio>=0.20.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0
+pytest-timeout>=2.1.0
+
+# HTTP testing
+httpx>=0.24.0
+requests>=2.28.0
+
+# Mocking and fixtures
+pytest-mock>=3.10.0
+responses>=0.22.0
+
+# Performance testing
+pytest-benchmark>=4.0.0
+locust>=2.14.0
+
+# Code quality
+flake8>=6.0.0
+black>=22.0.0
+isort>=5.12.0
+
+# Documentation testing
+pytest-doctestplus>=0.12.0
+
+# Security testing
+bandit>=1.7.5
+safety>=2.3.0
+
+# Async testing utilities
+asynctest>=0.13.0; python_version < "3.8"
+
+# Additional utilities for healthcare testing
+freezegun>=1.2.0
+factory-boy>=3.2.0
+faker>=18.0.0
